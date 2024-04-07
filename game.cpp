@@ -108,7 +108,7 @@ void Game::update(){
 
         // 완성된 line이 있으면 터뜨리기
         removeLine();
-        if(lines<1){
+        if(lines==0){
             gameclear=true;
             return;
         }
@@ -235,7 +235,7 @@ void Game::removeLine(){
     while(y_idx>0){
         if(isFullLine(y_idx)){
             // 라인이 꽉 찼다면, 해당 라인을 y_cursor에 그리지 않고 지나가기 
-            lines--;
+            if(lines>0) lines--;
         }
         else{
             // 라인이 꽉 차지 않았다면, 해당 라인을 y_cursor에 그냥 그리기
