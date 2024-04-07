@@ -50,7 +50,7 @@ Tetromino Tetromino::rotatedCW(){
     bool copy[MAX_SIZE][MAX_SIZE];
     for(int i=0;i<size_;i++){
         for(int j=0;j<size_;j++){
-            copy[size_-1-j][i]=shape_[i][j];
+            copy[j][size_-1-i]=shape_[i][j];
         }
     }
     return Tetromino(*this, copy);
@@ -65,7 +65,7 @@ Tetromino Tetromino::rotatedCCW(){
     bool copy[MAX_SIZE][MAX_SIZE];
     for(int i=0;i<size_;i++){
         for(int j=0;j<size_;j++){
-            copy[j][size_-1-i]=shape_[i][j];
+            copy[size_-1-j][i]=shape_[i][j];
         }
     }
     return Tetromino(*this, copy);
@@ -77,7 +77,9 @@ void Tetromino::drawAt(std::string s, int x, int y){
     for(int i=0;i<size_;i++){
         for(int j=0;j<size_;j++){
             if(shape_[i][j]){
-                console::draw(x+i, y+j, s);
+                // i가 고정되고 j가 변할 때, y는 고정되고 x는 변하니까
+                // y에는 i를 더하고, x에는 j를 더해야 함.
+                console::draw(x+j, y+i, s);  
             }
         }
     }

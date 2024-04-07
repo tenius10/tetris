@@ -19,6 +19,7 @@ private:
   // static 테트로미노를 참조
   Tetromino curTetro;
   Tetromino nextTetro;
+  Tetromino holdTetro;
 
   int cur_x;
   int cur_y;
@@ -26,8 +27,14 @@ private:
   int delay;  // 프레임 count
   int lines;  // 부순 line의 수
 
+  bool existHold;
+  bool canHold;
+
   bool gameclear;
   bool gameover;
+
+  // name 모양의 테트로미노를 생성한다.
+  Tetromino getTetro(std::string name);
 
   // 랜덤으로 테트로미노를 생성한다.
   Tetromino getRandomTetro();
@@ -52,6 +59,9 @@ private:
 
   // curTetro가 (x, y)에 있을 때, 테두리 혹은 기존 블록에 부딪히는지 여부를 반환한다.
   bool isConflict(Tetromino& tetro, int x, int y);
+
+  // 현재 테트로미노를 보관한다.
+  void hold();
   
 public:
   Game();

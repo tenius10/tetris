@@ -20,6 +20,9 @@ Game::Game(){
     delay=0;
     lines=LINES;
 
+    existHold=false;
+    canHold=true;
+
     gameclear=false;
     gameover=false;
 }
@@ -90,6 +93,10 @@ void Game::update(){
             cur_y++;
         }
     }
+    // 홀드
+    if(console::key(console::K_SPACE)){
+        if(canHold) hold();
+    }
     
     // 프레임 딜레이 확인
     if(delay < DROP_DELAY) return;
@@ -116,6 +123,7 @@ void Game::update(){
         // 새로운 테트로미노 가져오기
         curTetro=nextTetro;
         nextTetro=getRandomTetro();
+        canHold=true;
 
         // 테트로미노 위치 변경
         cur_x=(BOARD_WIDTH / 2)-(curTetro.size()/2);
@@ -159,6 +167,10 @@ void Game::draw(){
     // 6. hold 그리기
     console::drawBox(BOARD_WIDTH+9, 0, BOARD_WIDTH+14, 5);
     console::draw(BOARD_WIDTH+10, 0, "Hold");
+    if(existHold){
+        sm = holdTetro.size()/2;
+        holdTetro.original()->drawAt(BLOCK_STRING, BOARD_WIDTH+12-sm, 3-sm);
+    }
     
     // 7. 지워야 하는 line 개수 출력
     drawCenter(std::to_string(lines)+" lines left", BOARD_HEIGHT);
@@ -187,11 +199,11 @@ bool Game::isConflict(Tetromino& tetro, int x, int y){
         for(int j=0;j<size;j++){
             if(tetro.check(i, j)){
                 // 인덱스 검사
-                if(x+i < 1 || y+j < 1 || x+i > BOARD_WIDTH-2 || y+j > BOARD_HEIGHT-2){
+                if(x+j < 1 || y+i < 1 || x+j > BOARD_WIDTH-2 || y+i > BOARD_HEIGHT-2){
                     return true;
                 }
                 // 이미 쌓여있는 블록과 겹치는지 검사
-                if(board_[x+i][y+j]) {
+                if(board_[x+j][y+i]) {
                     return true;
                 }
             }
@@ -204,26 +216,11 @@ void Game::fixTetro(){
     int size=curTetro.size();
     for(int i=0;i<size;i++){
         for(int j=0;j<size;j++){
-            // 블록을 한 칸 내린 위치에 이미 고정된 블록이 있으면 false 반환
+            // 테트로미노를 board에 고정
             if(curTetro.check(i, j)){
-                board_[cur_x+i][cur_y+j]=true;
+                board_[cur_x+j][cur_y+i]=true;
             }
         }
-    }
-}
-
-// 랜덤으로 테트로미노를 생성한다.
-Tetromino Game::getRandomTetro(){
-    int idx = rand() % TETRO_COUNT;
-    // I, O, T, S, Z, J, L
-    switch(idx){
-        case 0: return Tetromino("I", 4, "XXXXOOOOXXXXXXXX");
-        case 1: return Tetromino("O", 2, "OOOO");
-        case 2: return Tetromino("T", 3, "XOXOOOXXX");
-        case 3: return Tetromino("S", 3, "XOOOOXXXX");
-        case 4: return Tetromino("Z", 3, "OOXXOOXXX");
-        case 5: return Tetromino("J", 3, "OXXOOOXXX");
-        default: return Tetromino("L", 3, "XXOOOOXXX");
     }
 }
 
@@ -261,4 +258,58 @@ bool Game::isFullLine(int y){
         if(!board_[i][y]) return false;
     }
     return true;
+}
+
+// 현재 테트로미노를 보관한다.
+void Game::hold(){
+    if(!canHold) return;
+
+    if(existHold){
+        // 홀드된 게 있다면, curTetro와 holdTetro를 swap
+        Tetromino tmp=curTetro;
+        curTetro=holdTetro;
+        holdTetro=tmp;
+
+        // 홀드했던 걸 가져오는 상황에서는 curTetro의 모양을 original의 모양과 일치시켜야 함.
+        // => Tetromino에 setter 메서드가 없으니까 새로 객체를 만들어야 함
+        curTetro=getTetro(curTetro.original()->name());
+    }
+    else{
+        // 홀드된 게 없다면 hold
+        holdTetro=curTetro;
+        curTetro=nextTetro;
+        nextTetro=getRandomTetro();
+    }
+
+    // 블록 좌표 이동
+    cur_x=(BOARD_WIDTH / 2)-(curTetro.size()/2);
+    cur_y=1;
+    
+    existHold=true;
+    canHold=false;
+}
+
+// 랜덤으로 테트로미노를 생성한다.
+Tetromino Game::getRandomTetro(){
+    int idx = rand() % TETRO_COUNT;
+    // I, O, T, S, Z, J, L
+    switch(idx){
+        case 0: return getTetro("I");
+        case 1: return getTetro("O");
+        case 2: return getTetro("T");
+        case 3: return getTetro("S");
+        case 4: return getTetro("Z");
+        case 5: return getTetro("J");
+        default: return getTetro("L");
+    }
+}
+
+Tetromino Game::getTetro(std::string name){
+    if(name=="I") return Tetromino("I", 4, "XXXXOOOOXXXXXXXX");
+    if(name=="O") return Tetromino("O", 2, "OOOO");
+    if(name=="T") return Tetromino("T", 3, "XOXOOOXXX");
+    if(name=="S") return Tetromino("S", 3, "XOOOOXXXX");
+    if(name=="Z") return Tetromino("Z", 3, "OOXXOOXXX");
+    if(name=="J") return Tetromino("J", 3, "OXXOOOXXX");
+    if(name=="L") return Tetromino("L", 3, "XXOOOOXXX");
 }
