@@ -26,6 +26,8 @@ private:
   // 테트로미노의 사이즈
   int size_;
 
+  Tetromino(Tetromino& copy, bool shape[MAX_SIZE][MAX_SIZE]);
+
 public:
   Tetromino();
   

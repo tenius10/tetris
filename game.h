@@ -8,7 +8,7 @@
 #define BOARD_HEIGHT 20
 #define LINES 40
 
-#define DROP_DELAY 10
+#define DROP_DELAY 30
 
 class Game {
 private:
@@ -24,15 +24,13 @@ private:
   int cur_y;
 
   int delay;  // 프레임 count
-  int line;  // 부순 line의 수
+  int lines;  // 부순 line의 수
 
+  bool gameclear;
   bool gameover;
 
   // 랜덤으로 테트로미노를 생성한다.
   Tetromino getRandomTetro();
-
-  // curTetro를 한 줄 아래로 내릴 수 있는지 여부를 반환한다.
-  bool canMoveDown();
 
   // curTetro를 현재 위치에 고정시킨다.
   void fixTetro();
@@ -42,6 +40,15 @@ private:
 
   // 화면에 게임 오버 문구를 보여준다.
   void gameOver();
+
+  // 문자열 s를 y 줄에 중앙 정렬로 출력한다.
+  void drawCenter(std::string s, int y);
+
+  // 완성된 line을 제거한다.
+  void removeLine();
+
+  // curTetro가 (x, y)에 있을 때, 테두리 혹은 기존 블록에 부딪히는지 여부를 반환한다.
+  bool isConflict(Tetromino& tetro, int x, int y);
   
 public:
   Game();

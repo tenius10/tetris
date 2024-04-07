@@ -18,39 +18,103 @@ Game::Game(){
     }
 
     delay=0;
-    line=0;
+    lines=LINES;
 
+    gameclear=false;
     gameover=false;
+}
+
+// 문자열 s를 y 줄에 중앙 정렬로 출력한다.
+void Game::drawCenter(std::string s, int y){
+    int bm = BOARD_WIDTH / 2;
+    int sm = s.size() / 2;
+    int idx = 0;
+    if(s.size() < BOARD_WIDTH) idx = bm - sm;
+    console::draw(idx, y, s);
+}
+
+void Game::gameClear(){
+    int y = BOARD_HEIGHT / 2;
+    drawCenter("You Win", y);
+}
+
+void Game::gameOver(){
+    int y = BOARD_HEIGHT / 2;
+    drawCenter("You Lost", y);
 }
 
 // 게임의 한 프레임을 처리한다.
 void Game::update(){
     delay++;
-    if(delay==DROP_DELAY){
-        // 딜레이 초기화
-        delay=0;
+    if(delay < DROP_DELAY) return;
 
-        // 게임 로직 처리
-        if(canMoveDown()){
-            // 아직 밑으로 이동할 수 있으면 블록 한 칸 내리기
-            cur_y++;
+    // 딜레이 초기화
+    delay = 0;
+    
+    // ESC 누르면 게임 즉시 종료
+    if(console::key(console::K_ESC)){
+        gameover=true;
+        return;
+    }
+    // 왼쪽으로 이동
+    if(console::key(console::K_LEFT)){
+        if(!isConflict(curTetro, cur_x-1, cur_y)){
+            cur_x--;
         }
-        else{
-            // 바닥에 도착했으면 고정시키기
-            fixTetro();
+    }
+    // 오른쪽으로 이동
+    if(console::key(console::K_RIGHT)){
+        if(!isConflict(curTetro, cur_x+1, cur_y)){
+            cur_x++;
+        }
+    }
+    // 시계 방향 회전
+    if(console::key(console::K_X)){
+        Tetromino cwTetro=curTetro.rotatedCW();
+        if(!isConflict(cwTetro, cur_x, cur_y)){
+            curTetro=cwTetro;
+        }
+    }
+    // 반시계 방향 회전
+    if(console::key(console::K_Z)){
+        Tetromino ccwTetro=curTetro.rotatedCCW();
+        if(!isConflict(ccwTetro, cur_x, cur_y)){
+            curTetro=ccwTetro;
+        }
+    }
+    // 하드 드롭
+    if(console::key(console::K_UP)){
+        while(!isConflict(curTetro, cur_x, cur_y+1)) cur_y++;
+    }
+    
 
-            // 새로운 테트로미노 가져오기
-            curTetro=nextTetro;
-            nextTetro=getRandomTetro();
+    // 게임 로직 처리
+    if(!isConflict(curTetro, cur_x, cur_y+1)){
+        // 아직 밑으로 이동할 수 있으면 블록 한 칸 내리기
+        cur_y++;
+    }
+    else{
+        // 바닥에 도착했으면 고정시키기
+        fixTetro();
 
-            // 테트로미노 위치 변경
-            cur_x=(BOARD_WIDTH / 2)-(curTetro.size()/2);
-            cur_y=1;
+        // 완성된 line이 있으면 터뜨리기
+        removeLine();
+        if(lines<1){
+            gameclear=true;
+            return;
+        }
 
-            // 새로운 블록을 생성했는데 canMoveDown이 false이면 gameover
-            if(!canMoveDown()){
-                gameover=true;
-            }
+        // 새로운 테트로미노 가져오기
+        curTetro=nextTetro;
+        nextTetro=getRandomTetro();
+
+        // 테트로미노 위치 변경
+        cur_x=(BOARD_WIDTH / 2)-(curTetro.size()/2);
+        cur_y=1;
+
+        // 새로운 블록을 생성했는데 기존 블록과 부딪히면 gameover
+        if(isConflict(curTetro, cur_x, cur_y+1)){
+            gameover=true;
         }
     }
 }
@@ -71,41 +135,57 @@ void Game::draw(){
             }
         }
     }
+
+    // 4. next 그리기
+    console::drawBox(BOARD_WIDTH+2, 0, BOARD_WIDTH+7, 5);
+    console::draw(BOARD_WIDTH+3, 0, "Next");
+    int bm = (BOARD_WIDTH * 2 + 9) / 2;
+    int sm = nextTetro.size() / 2;
+    //nextTetro.drawAt("", BOARD_WIDTH+2+bm-sm, 2-nextTetro.size()/2);
+    nextTetro.drawAt("", BOARD_WIDTH+3, 1);
+    
+    // 5. hold 그리기
+    console::drawBox(BOARD_WIDTH+9, 0, BOARD_WIDTH+14, 5);
+    console::draw(BOARD_WIDTH+10, 0, "Hold");
+    
+    // 6. 지워야 하는 line 개수 출력
+    drawCenter(std::to_string(lines)+" lines left", BOARD_HEIGHT);
+
+    // 7. 게임 결과 출력
+    if(gameclear) gameClear(); 
+    if(gameover) gameOver();
 }
 
 // 게임 루프가 종료되어야 하는지 여부를 반환한다.
 bool Game::shouldExit(){
     // LINES 만큼의 줄을 지우면 게임 클리어
-    if(line==LINES){
-        gameClear();
-        return true;
-    }
+    if(gameclear) return true;
     
     // 더 이상 블록을 생성할 공간이 없으면 게임 오버
-    // => 생성하자마자 canMoveDown이 false이면 gameover
-    if(gameover){
-        gameOver();
-        return true;
-    }
+    // => 생성한 블록이 기존 블록과 겹치거나, 아래로 내려갈 수 없는 경우 gameover
+    if(gameover) return true;
 
     return false;
 }
 
-// curTetro를 한 줄 아래로 내릴 수 있는지 여부를 반환한다.
-bool Game::canMoveDown(){
-    // 테트로미노를 한 칸 아래로 내렸을 때, board_와 겹치는지 검사
-    int size=curTetro.size();
+// curTetro가 (x, y)에 있을 때, 테두리 혹은 기존 블록에 부딪히는지 여부를 반환한다.
+bool Game::isConflict(Tetromino& tetro, int x, int y){
+    int size=tetro.size();
     for(int i=0;i<size;i++){
         for(int j=0;j<size;j++){
-            if(curTetro.check(i, j)){
-                // 한 칸 아래에 이미 고정된 블록이 있거나 인덱스 범위를 넘으면 false 반환
-                if(cur_y + j + 1 > BOARD_HEIGHT - 2 || board_[cur_x+i][cur_y+j+1]){
-                    return false;
+            if(tetro.check(i, j)){
+                // 인덱스 검사
+                if(x+i < 1 || y+j < 1 || x+i > BOARD_WIDTH-2 || y+j > BOARD_HEIGHT-2){
+                    return true;
+                }
+                // 이미 쌓여있는 블록과 겹치는지 검사
+                if(board_[x+i][y+j]) {
+                    return true;
                 }
             }
         }
     }
-    return true;
+    return false;
 }
 
 void Game::fixTetro(){
@@ -135,10 +215,7 @@ Tetromino Game::getRandomTetro(){
     }
 }
 
-void Game::gameClear(){
-
-}
-
-void Game::gameOver(){
+// 완성된 line을 제거한다.
+void Game::removeLine(){
 
 }
