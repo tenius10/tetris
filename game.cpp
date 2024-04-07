@@ -122,7 +122,7 @@ void Game::update(){
         cur_y=1;
 
         // 새로운 블록을 생성했는데 기존 블록과 부딪히면 gameover
-        if(isConflict(curTetro, cur_x, cur_y+1)){
+        if(isConflict(curTetro, cur_x, cur_y)){
             gameover=true;
         }
     }
@@ -153,10 +153,8 @@ void Game::draw(){
     // 5. next 그리기
     console::drawBox(BOARD_WIDTH+2, 0, BOARD_WIDTH+7, 5);
     console::draw(BOARD_WIDTH+3, 0, "Next");
-    int bm = (BOARD_WIDTH * 2 + 9) / 2;
     int sm = nextTetro.size() / 2;
-    //nextTetro.drawAt("", BOARD_WIDTH+2+bm-sm, 2-nextTetro.size()/2);
-    nextTetro.drawAt(BLOCK_STRING, BOARD_WIDTH+3, 1);
+    nextTetro.original()->drawAt(BLOCK_STRING, BOARD_WIDTH+5-sm, 3-sm);
     
     // 6. hold 그리기
     console::drawBox(BOARD_WIDTH+9, 0, BOARD_WIDTH+14, 5);
