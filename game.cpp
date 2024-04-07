@@ -46,11 +46,9 @@ void Game::gameOver(){
 // 게임의 한 프레임을 처리한다.
 void Game::update(){
     delay++;
-    if(delay < DROP_DELAY) return;
-
-    // 딜레이 초기화
-    delay = 0;
     
+    // 키 입력 확인
+
     // ESC 누르면 게임 즉시 종료
     if(console::key(console::K_ESC)){
         gameover=true;
@@ -86,7 +84,18 @@ void Game::update(){
     if(console::key(console::K_UP)){
         while(!isConflict(curTetro, cur_x, cur_y+1)) cur_y++;
     }
+    // 소프트 드롭
+    if(console::key(console::K_DOWN)){
+        if(!isConflict(curTetro, cur_x, cur_y+1)){
+            cur_y++;
+        }
+    }
     
+    // 프레임 딜레이 확인
+    if(delay < DROP_DELAY) return;
+
+    // 딜레이 초기화
+    delay = 0;
 
     // 게임 로직 처리
     if(!isConflict(curTetro, cur_x, cur_y+1)){
