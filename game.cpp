@@ -133,10 +133,15 @@ void Game::draw(){
     // 1. 게임 테두리 그리기
     console::drawBox(0, 0, BOARD_WIDTH-1, BOARD_HEIGHT-1);
 
-    // 2. 위에서 떨어지는 테트로미노 그리기
-    curTetro.drawAt("", cur_x, cur_y);
+    // 2. shadow 그리기 (내려오는 블록, 쌓인 블록보다 먼저 그려야 함)
+    int dy = 0;
+    while(!isConflict(curTetro, cur_x, cur_y+dy+1)) dy++;
+    curTetro.drawAt(SHADOW_STRING, cur_x, cur_y+dy);
 
-    // 3. 이미 쌓인 블럭 그리기
+    // 3. 위에서 떨어지는 테트로미노 그리기
+    curTetro.drawAt(BLOCK_STRING, cur_x, cur_y);
+
+    // 4. 이미 쌓인 블럭 그리기
     for(int i=0;i<BOARD_HEIGHT;i++){
         for(int j=0;j<BOARD_WIDTH;j++){
             if(board_[j][i]){
@@ -145,22 +150,22 @@ void Game::draw(){
         }
     }
 
-    // 4. next 그리기
+    // 5. next 그리기
     console::drawBox(BOARD_WIDTH+2, 0, BOARD_WIDTH+7, 5);
     console::draw(BOARD_WIDTH+3, 0, "Next");
     int bm = (BOARD_WIDTH * 2 + 9) / 2;
     int sm = nextTetro.size() / 2;
     //nextTetro.drawAt("", BOARD_WIDTH+2+bm-sm, 2-nextTetro.size()/2);
-    nextTetro.drawAt("", BOARD_WIDTH+3, 1);
+    nextTetro.drawAt(BLOCK_STRING, BOARD_WIDTH+3, 1);
     
-    // 5. hold 그리기
+    // 6. hold 그리기
     console::drawBox(BOARD_WIDTH+9, 0, BOARD_WIDTH+14, 5);
     console::draw(BOARD_WIDTH+10, 0, "Hold");
     
-    // 6. 지워야 하는 line 개수 출력
+    // 7. 지워야 하는 line 개수 출력
     drawCenter(std::to_string(lines)+" lines left", BOARD_HEIGHT);
 
-    // 7. 게임 결과 출력
+    // 8. 게임 결과 출력
     if(gameclear) gameClear(); 
     if(gameover) gameOver();
 }

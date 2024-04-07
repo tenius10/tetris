@@ -73,11 +73,11 @@ Tetromino Tetromino::rotatedCCW(){
 
 // 화면의 x, y 위치에 s 문자열로  테트로미노를 그린다
 void Tetromino::drawAt(std::string s, int x, int y){
-    // 매개변수 s는 디버깅 용도로, 실제 구현에는 사용되지 않음.
+    // s에는 BLOCK_STRING 혹은 SHADOW_STRING이 들어올 수 있다.
     for(int i=0;i<size_;i++){
         for(int j=0;j<size_;j++){
             if(shape_[i][j]){
-                console::draw(x+i, y+j, BLOCK_STRING);
+                console::draw(x+i, y+j, s);
             }
         }
     }
