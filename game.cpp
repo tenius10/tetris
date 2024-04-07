@@ -25,6 +25,8 @@ Game::Game(){
 
     gameclear=false;
     gameover=false;
+
+    startTime=clock();
 }
 
 // 문자열 s를 y 줄에 중앙 정렬로 출력한다.
@@ -36,9 +38,10 @@ void Game::drawCenter(std::string s, int y){
     console::draw(idx, y, s);
 }
 
-void Game::gameClear(){
+void Game::gameClear(std::string clearTime){
     int y = BOARD_HEIGHT / 2;
     drawCenter("You Win", y);
+    drawCenter(clearTime, y+1);
 }
 
 void Game::gameOver(){
@@ -175,8 +178,12 @@ void Game::draw(){
     // 7. 지워야 하는 line 개수 출력
     drawCenter(std::to_string(lines)+" lines left", BOARD_HEIGHT);
 
-    // 8. 게임 결과 출력
-    if(gameclear) gameClear(); 
+    // 8. 플레이 시간 출력
+    std::string curTime=getCurTime();
+    drawCenter(curTime, BOARD_HEIGHT+1);
+
+    // 9. 게임 결과 출력
+    if(gameclear) gameClear(curTime); 
     if(gameover) gameOver();
 }
 
@@ -312,4 +319,24 @@ Tetromino Game::getTetro(std::string name){
     if(name=="Z") return Tetromino("Z", 3, "OOXXOOXXX");
     if(name=="J") return Tetromino("J", 3, "OXXOOOXXX");
     if(name=="L") return Tetromino("L", 3, "XXOOOOXXX");
+}
+
+// 현재 시간(분/초/밀리초)을 --:--.-- 형태의 string으로 반환한다.
+std::string Game::getCurTime(){
+    endTime=clock();
+    double intervalSecond=(double)(endTime-startTime)/CLOCKS_PER_SEC;
+    int minute=(int)(intervalSecond/60);
+    int second=(int)intervalSecond%60;
+    int milliSecond=(intervalSecond-(int)intervalSecond)*1000;  // 0 ~ 999
+    milliSecond/=10;  // 0 ~ 99
+
+    std::string curTime="";
+    curTime+=(minute<10)?"0":"";
+    curTime+=std::to_string(minute)+":";
+    curTime+=(second<10)?"0":"";
+    curTime+=std::to_string(second)+".";
+    curTime+=(milliSecond<10)?"0":"";
+    curTime+=std::to_string(milliSecond);
+    
+    return curTime;
 }

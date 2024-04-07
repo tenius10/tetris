@@ -2,13 +2,14 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <time.h>
 #include "tetromino.h"
 
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
-#define LINES 4
+#define LINES 40
 
-#define DROP_DELAY 30
+#define DROP_DELAY 60
 
 class Game {
 private:
@@ -33,6 +34,10 @@ private:
   bool gameclear;
   bool gameover;
 
+  clock_t startTime;
+  clock_t endTime;
+
+
   // name 모양의 테트로미노를 생성한다.
   Tetromino getTetro(std::string name);
 
@@ -43,7 +48,7 @@ private:
   void fixTetro();
 
   // 화면에 게임 클리어 문구를 보여준다.
-  void gameClear();
+  void gameClear(std::string clearTime);
 
   // 화면에 게임 오버 문구를 보여준다.
   void gameOver();
@@ -62,6 +67,9 @@ private:
 
   // 현재 테트로미노를 보관한다.
   void hold();
+
+  // 현재 시간(분/초/밀리초)을 --:--.-- 형태의 string으로 반환한다.
+  std::string getCurTime();
   
 public:
   Game();
