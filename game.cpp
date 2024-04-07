@@ -229,5 +229,36 @@ Tetromino Game::getRandomTetro(){
 
 // 완성된 line을 제거한다.
 void Game::removeLine(){
+    // 아래에서부터 검사
+    int y_cursor=BOARD_HEIGHT-2;
+    int y_idx=BOARD_HEIGHT-2;
+    while(y_idx>0){
+        if(isFullLine(y_idx)){
+            // 라인이 꽉 찼다면, 해당 라인을 y_cursor에 그리지 않고 지나가기 
+            lines--;
+        }
+        else{
+            // 라인이 꽉 차지 않았다면, 해당 라인을 y_cursor에 그냥 그리기
+            for(int i=0;i<BOARD_WIDTH;i++){
+                board_[i][y_cursor]=board_[i][y_idx];
+            }
+            y_cursor--;
+        }
+        y_idx--;
+    }
+    // 위에 빈 공간은 false로 채워넣기
+    while(y_cursor>0){
+        for(int i=0;i<BOARD_WIDTH;i++){
+            board_[i][y_cursor]=false;
+        }
+        y_cursor--;
+    }
+}
 
+// BOARD의 y번째 줄이 꽊 찼는지 여부를 반환한다.
+bool Game::isFullLine(int y){
+    for(int i=1;i<BOARD_WIDTH-1;i++){
+        if(!board_[i][y]) return false;
+    }
+    return true;
 }

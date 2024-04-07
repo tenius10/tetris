@@ -47,6 +47,9 @@ private:
   // 완성된 line을 제거한다.
   void removeLine();
 
+  // BOARD의 y번째 줄이 꽊 찼는지 여부를 반환한다.
+  bool isFullLine(int y);
+
   // curTetro가 (x, y)에 있을 때, 테두리 혹은 기존 블록에 부딪히는지 여부를 반환한다.
   bool isConflict(Tetromino& tetro, int x, int y);
   
