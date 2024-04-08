@@ -29,8 +29,6 @@ private:
   Tetromino(Tetromino& copy, bool shape[MAX_SIZE][MAX_SIZE]);
 
 public:
-  Tetromino();
-  
   // 사이즈와 shape 문자열을 통해 생성한다.
   // 문자열은 size * size 길이의 문자열이 주어진다.
 

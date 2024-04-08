@@ -12,9 +12,6 @@ Tetromino Tetromino::Z("Z", 3, "OOXXOOXXX");
 Tetromino Tetromino::J("J", 3, "OXXOOOXXX");
 Tetromino Tetromino::L("L", 3, "XXOOOOXXX");
 
-Tetromino::Tetromino(){
-
-}
 
 Tetromino::Tetromino(Tetromino& copy, bool shape[MAX_SIZE][MAX_SIZE]){
     name_=copy.name_;
