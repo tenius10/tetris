@@ -25,6 +25,7 @@ Game::Game(){
 
     gameclear=false;
     gameover=false;
+    esc=false;
 
     startTime=clock();
 }
@@ -57,7 +58,7 @@ void Game::update(){
 
     // ESC 누르면 게임 즉시 종료
     if(console::key(console::K_ESC)){
-        gameover=true;
+        esc=true;
         return;
     }
     // 왼쪽으로 이동
@@ -195,6 +196,9 @@ bool Game::shouldExit(){
     // 더 이상 블록을 생성할 공간이 없으면 게임 오버
     // => 생성한 블록이 기존 블록과 겹치거나, 아래로 내려갈 수 없는 경우 gameover
     if(gameover) return true;
+
+    // esc 누르면 게임 종료
+    if(esc) return true;
 
     return false;
 }

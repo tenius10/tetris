@@ -33,6 +33,7 @@ private:
 
   bool gameclear;
   bool gameover;
+  bool esc;
 
   clock_t startTime;
   clock_t endTime;
