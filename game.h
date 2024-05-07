@@ -45,7 +45,7 @@ private:
   // 랜덤으로 테트로미노를 생성한다.
   Tetromino getRandomTetro();
 
-  // curTetro를 현재 위치에 고정시킨다.
+  // 현재 테트로미노를 현재 위치에 고정시킨다.
   void fixTetro();
 
   // 화면에 게임 클리어 문구를 보여준다.
@@ -58,7 +58,7 @@ private:
   void drawCenter(std::string s, int y);
 
   // 완성된 line을 제거한다.
-  void removeLine();
+  void checkAndRemoveLine();
 
   // BOARD의 y번째 줄이 꽊 찼는지 여부를 반환한다.
   bool isFullLine(int y);
@@ -68,6 +68,12 @@ private:
 
   // 현재 테트로미노를 보관한다.
   void hold();
+
+  // 현재 테트로미노를 바로 바닥에 고정시킨다 (하드 드롭)
+  void hardDrop();
+
+  // 현재 테트로미노를 빠르게 떨어뜨린다 (소프트 드롭)
+  void softDrop();
 
   // 현재 시간(분/초/밀리초)을 --:--.-- 형태의 string으로 반환한다.
   std::string getCurTime();

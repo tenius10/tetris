@@ -39,12 +39,14 @@ void Game::drawCenter(std::string s, int y){
     console::draw(idx, y, s);
 }
 
+// 화면에 게임 클리어 문구를 보여준다.
 void Game::gameClear(std::string clearTime){
     int y = BOARD_HEIGHT / 2;
     drawCenter("You Win", y);
     drawCenter(clearTime, y+1);
 }
 
+// 화면에 게임 오버 문구를 보여준다.
 void Game::gameOver(){
     int y = BOARD_HEIGHT / 2;
     drawCenter("You Lost", y);
@@ -89,55 +91,53 @@ void Game::update(){
     }
     // 하드 드롭
     if(console::key(console::K_UP)){
-        while(!isConflict(curTetro, cur_x, cur_y+1)) cur_y++;
+        hardDrop();
     }
     // 소프트 드롭
     if(console::key(console::K_DOWN)){
-        if(!isConflict(curTetro, cur_x, cur_y+1)){
-            cur_y++;
-        }
+        softDrop();
     }
     // 홀드
     if(console::key(console::K_SPACE)){
         if(canHold) hold();
     }
     
-    // 프레임 딜레이 확인
-    if(delay < DROP_DELAY) return;
+    // 프레임 딜레이만큼 기다렸으면 로직 실행
+    if(delay >= DROP_DELAY){
+        // 딜레이 초기화
+        delay = 0;
 
-    // 딜레이 초기화
-    delay = 0;
-
-    // 게임 로직 처리
-    if(!isConflict(curTetro, cur_x, cur_y+1)){
-        // 아직 밑으로 이동할 수 있으면 블록 한 칸 내리기
-        cur_y++;
-    }
-    else{
-        // 바닥에 도착했으면 고정시키기
-        fixTetro();
-
-        // 완성된 line이 있으면 터뜨리기
-        removeLine();
-        if(lines==0){
-            gameclear=true;
-            return;
+        // 게임 로직 처리
+        if(!isConflict(curTetro, cur_x, cur_y+1)){
+            // 아직 밑으로 이동할 수 있으면 블록 한 칸 내리기
+            cur_y++;
         }
+        else{
+            // 바닥에 도착했으면 고정시키기
+            fixTetro();
 
-        // 새로운 테트로미노 가져오기
-        curTetro=nextTetro;
-        nextTetro=getRandomTetro();
-        canHold=true;
+            // 완성된 line이 있으면 터뜨리기
+            checkAndRemoveLine();
+            if(lines==0){
+                gameclear=true;
+                return;
+            }
 
-        // 테트로미노 위치 변경
-        cur_x=(BOARD_WIDTH / 2)-(curTetro.size()/2);
-        cur_y=1;
+            // 새로운 테트로미노 가져오기
+            curTetro=nextTetro;
+            nextTetro=getRandomTetro();
+            canHold=true;
 
-        // 새로운 블록을 생성했는데 기존 블록과 부딪히면 gameover
-        if(isConflict(curTetro, cur_x, cur_y)){
-            gameover=true;
+            // 테트로미노 위치 변경
+            cur_x=(BOARD_WIDTH / 2)-(curTetro.size()/2);
+            cur_y=1;
+
+            // 새로운 블록을 생성했는데 기존 블록과 부딪히면 gameover
+            if(isConflict(curTetro, cur_x, cur_y)){
+                gameover=true;
+            }
         }
-    }
+    }    
 }
 
 // 게임 화면을 그린다.
@@ -223,6 +223,7 @@ bool Game::isConflict(Tetromino& tetro, int x, int y){
     return false;
 }
 
+// 현재 테트로미노를 현재 위치에 고정시킨다.
 void Game::fixTetro(){
     int size=curTetro.size();
     for(int i=0;i<size;i++){
@@ -236,7 +237,7 @@ void Game::fixTetro(){
 }
 
 // 완성된 line을 제거한다.
-void Game::removeLine(){
+void Game::checkAndRemoveLine(){
     // 아래에서부터 검사
     int y_cursor=BOARD_HEIGHT-2;
     int y_idx=BOARD_HEIGHT-2;
@@ -300,6 +301,21 @@ void Game::hold(){
     canHold=false;
 }
 
+// 현재 테트로미노를 바로 바닥에 고정시킨다 (하드 드롭)
+void Game::hardDrop(){
+    while(!isConflict(curTetro, cur_x, cur_y+1)){
+        cur_y++;
+    }
+}
+
+// 현재 테트로미노를 빠르게 떨어뜨린다 (소프트 드롭)
+void Game::softDrop(){
+    if(!isConflict(curTetro, cur_x, cur_y+1)){
+        cur_y++;
+    }
+}
+
+
 // 랜덤으로 테트로미노를 생성한다.
 Tetromino Game::getRandomTetro(){
     int idx = rand() % TETRO_COUNT;
@@ -315,6 +331,7 @@ Tetromino Game::getRandomTetro(){
     }
 }
 
+// name 모양의 테트로미노를 생성한다.
 Tetromino Game::getTetro(std::string name){
     if(name=="I") return Tetromino("I", 4, "XXXXOOOOXXXXXXXX");
     if(name=="O") return Tetromino("O", 2, "OOOO");
